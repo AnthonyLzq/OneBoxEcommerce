@@ -5,6 +5,7 @@ import com.xcale.ecommerce.dbo.CartDBO;
 import com.xcale.ecommerce.dto.CartDTO;
 import com.xcale.ecommerce.dto.CartItemDTO;
 import com.xcale.ecommerce.repository.CartRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +15,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CartService {
   private final Logger LOGGER = LoggerFactory.getLogger(CartService.class);
   private final CartRepository cartRepository;
   private final CartConverter cartConverter;
-
-  @Autowired
-  public CartService(CartRepository cartRepository, CartConverter cartConverter) {
-    this.cartRepository = cartRepository;
-    this.cartConverter = cartConverter;
-  }
 
   public String createCart(List<CartItemDTO> items) {
     CartDBO cartDBO = CartDBO.builder().items(cartConverter.convertFromDTOs(items)).build();

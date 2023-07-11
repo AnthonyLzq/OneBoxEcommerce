@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 @Repository
 public class CartRepositoryImpl implements CartRepository {
-  private RedisTemplate<String, CartDBO> redisTemplate;
-  private ValueOperations<String, CartDBO> valueOperations;
-  private Integer ttl;
+  final private RedisTemplate<String, CartDBO> redisTemplate;
+  final private ValueOperations<String, CartDBO> valueOperations;
+  final private Integer ttl;
 
   @Autowired
   public CartRepositoryImpl(
