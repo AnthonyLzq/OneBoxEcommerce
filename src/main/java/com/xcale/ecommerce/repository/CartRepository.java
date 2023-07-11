@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface CartRepository {
   String save(CartDBO cart);
   Optional<CartDBO> get(String cartId);
-  void delete(String cartId);
-  String update(String cartId, CartDBO cartItem);
+  Boolean delete(String cartId);
+  CartDBO update(String cartId, CartDBO cartItem);
 }

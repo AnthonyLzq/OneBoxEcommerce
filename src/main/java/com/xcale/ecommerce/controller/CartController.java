@@ -3,6 +3,7 @@ package com.xcale.ecommerce.controller;
 import com.xcale.ecommerce.dto.CartDTO;
 import com.xcale.ecommerce.dto.CartItemDTO;
 import com.xcale.ecommerce.dto.CreateCartRequest;
+import com.xcale.ecommerce.dto.OperationResult;
 import com.xcale.ecommerce.dto.UpdateCartRequest;
 import com.xcale.ecommerce.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,31 +30,33 @@ public class CartController {
   }
 
   @PostMapping
-  public ResponseEntity<String> createCart(@RequestBody CreateCartRequest createCartRequest) {
-    List<CartItemDTO> items = createCartRequest.getItems();
-    String cartId = cartService.createCart(items);
+  public ResponseEntity<OperationResult<CartDTO>> createCart(@RequestBody CreateCartRequest createCartRequest) {
+    OperationResult<CartDTO> result = cartService.createCart(createCartRequest.getItems());
 
-    return ResponseEntity.ok(cartId);
+    return ResponseEntity.status(result.getMessage().getCode()).body(result);
   }
 
   @GetMapping("/{cartId}")
-  public ResponseEntity<CartDTO> getCart(@PathVariable String cartId) {
-    CartDTO cartDTO = cartService.getCart(cartId);
+  public ResponseEntity<OperationResult<CartDTO>> getCart(@PathVariable String cartId) {
+    OperationResult<CartDTO> result = cartService.getCart(cartId);
 
-    return ResponseEntity.ok(cartDTO);
+    return ResponseEntity.status(result.getMessage().getCode()).body(result);
   }
 
   @PatchMapping
-  public ResponseEntity<String> updateCart(@RequestBody UpdateCartRequest createCartRequest) {
-    String updatedCartId = cartService.updateCart(createCartRequest.getCartId(), createCartRequest.getItems());
+  public ResponseEntity<OperationResult<CartDTO>> updateCart(@RequestBody UpdateCartRequest createCartRequest) {
+    OperationResult<CartDTO> result = cartService.updateCart(
+      createCartRequest.getCartId(),
+      createCartRequest.getItems()
+    );
 
-    return ResponseEntity.ok(updatedCartId);
+    return ResponseEntity.status(result.getMessage().getCode()).body(result);
   }
 
   @DeleteMapping("/{cartId}")
-  public ResponseEntity<String> deleteCart(@PathVariable String cartId) {
-    String deletedCartId = cartService.deleteCart(cartId);
+  public ResponseEntity<OperationResult<String>> deleteCart(@PathVariable String cartId) {
+    OperationResult<String> result = cartService.deleteCart(cartId);
 
-    return ResponseEntity.ok(deletedCartId);
+    return ResponseEntity.status(result.getMessage().getCode()).body(result);
   }
 }

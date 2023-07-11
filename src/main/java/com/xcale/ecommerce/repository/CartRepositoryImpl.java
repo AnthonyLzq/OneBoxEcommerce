@@ -45,21 +45,21 @@ public class CartRepositoryImpl implements CartRepository {
   }
 
   @Override
-  public void delete(String cartId) {
-    redisTemplate.delete(cartId);
-  }
-
-  @Override
-  public String update(String cartId, CartDBO cartDBO) {
+  public CartDBO update(String cartId, CartDBO cartDBO) {
     Optional<CartDBO> optionalCart = get(cartId);
 
     if (optionalCart.isEmpty()) return null;
 
     CartDBO cartFound = optionalCart.get();
-    cartDBO.getItems().addAll(cartFound.getItems());
-    valueOperations.set(cartId, cartDBO);
+    cartFound.getItems().addAll(cartDBO.getItems());
+    valueOperations.set(cartId, cartFound);
     redisTemplate.expire(cartId, ttl, TimeUnit.MINUTES);
 
-    return cartId;
+    return cartFound;
+  }
+
+  @Override
+  public Boolean delete(String cartId) {
+    return redisTemplate.delete(cartId);
   }
 }

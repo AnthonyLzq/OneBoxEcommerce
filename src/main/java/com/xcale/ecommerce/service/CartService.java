@@ -4,6 +4,8 @@ import com.xcale.ecommerce.converter.CartConverter;
 import com.xcale.ecommerce.dbo.CartDBO;
 import com.xcale.ecommerce.dto.CartDTO;
 import com.xcale.ecommerce.dto.CartItemDTO;
+import com.xcale.ecommerce.dto.OperationResult;
+import com.xcale.ecommerce.dto.ResultMessage;
 import com.xcale.ecommerce.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,59 +23,118 @@ public class CartService {
   private final CartRepository cartRepository;
   private final CartConverter cartConverter;
 
-  public String createCart(List<CartItemDTO> items) {
+  public OperationResult<CartDTO> createCart(List<CartItemDTO> items) {
     CartDBO cartDBO = CartDBO.builder().items(cartConverter.convertFromDTOs(items)).build();
 
     try {
       String cartId = cartRepository.save(cartDBO);
       LOGGER.info("Cart created with id: {}", cartId);
 
-      return cartId;
+      return OperationResult
+        .<CartDTO>builder()
+        .data("cart")
+        .value(CartDTO.builder().id(cartId).items(items).build())
+        .message(ResultMessage.CREATION_SUCCESS)
+        .success(true)
+        .build();
     } catch (Exception e) {
-      LOGGER.error("Error creating cart", e);
-      return null;
+      return handleError("Error creating cart", e);
     }
   }
 
-  public CartDTO getCart(String cartId) {
+  public OperationResult<CartDTO> getCart(String cartId) {
     try {
       CartDBO cartDBO = cartRepository.get(cartId).orElse(null);
 
-      if (Objects.isNull(cartDBO)) return null;
+      if (Objects.isNull(cartDBO))
+        return OperationResult
+          .<CartDTO>builder()
+          .data("cart")
+          .value(null)
+          .message(ResultMessage.NOT_FOUND)
+          .success(false)
+          .build();
 
       CartDTO cartDTO = cartConverter.convert(cartDBO);
       cartDTO.setId(cartId);
 
-      return cartDTO;
+      return OperationResult
+        .<CartDTO>builder()
+        .data("cart")
+        .value(cartDTO)
+        .message(ResultMessage.FOUND)
+        .success(true)
+        .build();
     } catch (Exception e) {
-      LOGGER.error("Error getting cart", e);
-      return null;
+      return handleError("Error getting cart", e);
     }
   }
 
-  public String updateCart(String cartId, List<CartItemDTO> items) {
+  public OperationResult<CartDTO> updateCart(String cartId, List<CartItemDTO> items) {
     CartDBO cartDBO = CartDBO.builder().items(cartConverter.convertFromDTOs(items)).build();
 
     try {
-      cartRepository.update(cartId, cartDBO);
+      CartDBO cartFound = cartRepository.update(cartId, cartDBO);
+
+      if (Objects.isNull(cartFound))
+        return OperationResult
+          .<CartDTO>builder()
+          .data("cart")
+          .value(null)
+          .message(ResultMessage.NOT_FOUND)
+          .success(false)
+          .build();
+
       LOGGER.info("Cart updated with id: {}", cartId);
 
-      return cartId;
+      return OperationResult
+        .<CartDTO>builder()
+        .data("cart")
+        .value(cartConverter.convert(cartFound))
+        .message(ResultMessage.UPDATE_SUCCESS)
+        .success(true)
+        .build();
     } catch (Exception e) {
-      LOGGER.error("Error updating cart", e);
-      return null;
+      return handleError("Error updating cart", e);
     }
   }
 
-  public String deleteCart(String cartId) {
+  public OperationResult<String> deleteCart(String cartId) {
     try {
-      cartRepository.delete(cartId);
+      Boolean deleteCartResult = cartRepository.delete(cartId);
+
+      if (!deleteCartResult)
+        return OperationResult
+          .<String>builder()
+          .data("cartId")
+          .value(cartId)
+          .message(ResultMessage.NOT_REMOVED)
+          .success(false)
+          .build();
+
       LOGGER.info("Cart deleted with id: {}", cartId);
 
-      return cartId;
+      return OperationResult
+        .<String>builder()
+        .data("cartId")
+        .value(cartId)
+        .message(ResultMessage.DELETION_SUCCESS)
+        .success(true)
+        .build();
     } catch (Exception e) {
-      LOGGER.error("Error deleting cart", e);
-      return null;
+      return handleError("Error deleting cart", e);
     }
+  }
+
+  private <T> OperationResult<T> handleError(String message, Exception e) {
+    LOGGER.error(message, e);
+
+    return OperationResult
+      .<T>builder()
+      .data("cart")
+      .data(null)
+      .message(ResultMessage.INTERNAL_ERROR)
+      .success(false)
+      .build();
   }
 }
