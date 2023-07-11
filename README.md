@@ -80,6 +80,25 @@ Once you run the tests you will and output similar to the following:
 
 ![](./docs/tests.png)
 
+## How TTL (Time to Live) Works
+
+When a shopping cart is created, a Redis set command is used to set the TTL to 10 minutes.
+This means that the cart will be automatically deleted by Redis after 10 minutes of inactivity.
+
+Every time the shopping cart is interacted with (either by querying or updating it), the TTL is reset.
+This ensures that the cart remains active as long as the user is actively using it.
+However, if no interactions occur within the 10-minute timeframe, the TTL expires and Redis automatically deletes the cart.
+
+This mechanism helps to clean up and remove unused shopping carts, ensuring efficient use of system resources.
+
+Cart still active:
+
+![](./docs/cart_active.png)
+
+Cart expired:
+
+![](./docs/cart_expired.png)
+
 ## Available Endpoints
 
 - `POST /api/cart`: Creates a new shopping cart and returns it.
