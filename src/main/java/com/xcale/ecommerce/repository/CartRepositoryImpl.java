@@ -18,10 +18,7 @@ public class CartRepositoryImpl implements CartRepository {
   final private Integer ttl;
 
   @Autowired
-  public CartRepositoryImpl(
-    RedisTemplate<String, CartDBO> redisTemplate,
-    @Value("${spring.redis.ttl}") Integer ttl
-  ) {
+  public CartRepositoryImpl(RedisTemplate<String, CartDBO> redisTemplate, @Value("${spring.redis.ttl}") Integer ttl) {
     this.redisTemplate = redisTemplate;
     this.valueOperations = redisTemplate.opsForValue();
     this.ttl = ttl;

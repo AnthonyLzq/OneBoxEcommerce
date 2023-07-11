@@ -45,10 +45,7 @@ public class CartController {
 
   @PatchMapping
   public ResponseEntity<OperationResult<CartDTO>> updateCart(@RequestBody UpdateCartRequest createCartRequest) {
-    OperationResult<CartDTO> result = cartService.updateCart(
-      createCartRequest.getCartId(),
-      createCartRequest.getItems()
-    );
+    OperationResult<CartDTO> result = cartService.updateCart(createCartRequest.getCartId(), createCartRequest.getItems());
 
     return ResponseEntity.status(result.getMessage().getCode()).body(result);
   }
